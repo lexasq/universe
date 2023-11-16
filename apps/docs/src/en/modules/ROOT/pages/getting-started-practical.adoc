@@ -308,7 +308,7 @@ The remote entry files are tiny mappings for Webpack to resolve the individually
 
 == Consuming Federated Components
 
-Now that our two SPA applications are Container Hosts and Consumers, we can start to consume the shared components. In the Цebpack config we had specified the names of the containers as `application_a` and `application_b`, so that is where we will import the components from.
+Now that our two SPA applications are Container Hosts and Consumers, we can start to consume the shared components. In the Webpack config we had specified the names of the containers as `application_a` and `application_b`, so that is where we will import the components from.
 
 Starting with Application A, we can render the `SayHelloFromB` component like so from within the bootstrap file:
 
