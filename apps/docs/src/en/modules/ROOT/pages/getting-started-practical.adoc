@@ -50,9 +50,9 @@ Next, create two directories for our SPAs to live in under a new packages direct
     "@babel/preset-react": "^7.8.3",
     "babel-loader": "^8.0.6",
     "concurrently": "^5.1.0",
-    "html-webpack-plugin": "git://github.com/ScriptedAlchemy/html-webpack-plugin#master",
+    "html-webpack-plugin": "^5.6.0",
     "serve": "^11.3.0",
-    "webpack": "git://github.com/webpack/webpack.git#dev-1",
+    "webpack": "^5.89.0",
     "webpack-cli": "^3.3.11"
   }
 }
@@ -79,9 +79,9 @@ Next, create two directories for our SPAs to live in under a new packages direct
     "@babel/preset-react": "^7.8.3",
     "babel-loader": "^8.0.6",
     "concurrently": "^5.1.0",
-    "html-webpack-plugin": "git://github.com/ScriptedAlchemy/html-webpack-plugin#master",
+    "html-webpack-plugin": "^5.6.0",
     "serve": "^11.3.0",
-    "webpack": "git://github.com/webpack/webpack.git#dev-1",
+    "webpack": "^5.89.0",
     "webpack-cli": "^3.3.11"
   }
 }
@@ -128,39 +128,15 @@ Now we can implement our two `app.jsx` files for each application that will hous
 [source,jsx]
 ----
 // packages/application-a/src/app.jsx
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ModuleFederationPlugin = require('webpack/lib/container/ModuleFederationPlugin');
+import React from "react";
 
-const mode = process.env.NODE_ENV || 'production';
-
-module.exports = {
-  mode,
-  entry: './src/index',
-  devtool: 'source-map',
-  optimization: {
-    minimize: mode === 'production',
-  },
-  resolve: {
-    extensions: ['.jsx', '.js', '.json'],
-  },
-  module: {
-    rules: [
-      {
-        test: /\.jsx?$/,
-        loader: require.resolve('babel-loader'),
-        options: {
-          presets: [require.resolve('@babel/preset-react')],
-        },
-      },
-    ],
-  },
-
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './public/index.html',
-    }),
-  ],
-};
+export default function App() {
+  return (
+    <div style={{ padding: 10 }}>
+      <h2>Application 1</h2>
+    </div>
+  );
+}
 ----
 
 From the root of the application, you should now be able to access your two SPAs on http://localhost:3001 and http://localhost:3002 when running `yarn dev`.
@@ -211,7 +187,7 @@ module.exports = {
       library: { type: 'var', name: 'application_a' },
       filename: 'remoteEntry.js',
       exposes: {
-        'SayHelloFromA': './src/app',
+        './SayHelloFromA': './src/app',
       },
       remotes: {
         'application_b': 'application_b',
@@ -269,7 +245,7 @@ module.exports = {
       library: { type: 'var', name: 'application_b' },
       filename: 'remoteEntry.js',
       exposes: {
-        'SayHelloFromB': './src/app',
+        './SayHelloFromB': './src/app',
       },
       remotes: {
         'application_a': 'application_a',
