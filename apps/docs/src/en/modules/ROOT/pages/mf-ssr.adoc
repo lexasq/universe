@@ -1,7 +1,8 @@
-= Setting up Module Federation with Server-Side Rendering
+= Server-Side Rendering with Module Federation
 
 In this guide, we will walk you through setting up Module Federation with Server-Side Rendering (SSR) in a framework-agnostic manner. We assume you already have a basic understanding of Module Federation and have set it up in your project. If you need a refresher, please refer to the Module Federation setup guide. This guide focuses on the steps required to enable SSR with Module Federation.
-Table of Contents
+
+== Table of Contents
 
 - Understanding the Challenges with SSR and Module Federation
 - Server-Side Bundle Configuration
