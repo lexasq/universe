@@ -1,4 +1,4 @@
-# Team collaboration and code review when working with Federated Modules
+# Collaborative Practices and Code Review Techniques for Federated Module Development
 
 Federated Modules are a feature of Webpack 5 that allows you to create and consume JavaScript modules that are dynamically loaded at runtime. They enable you to share code across different applications without requiring a build step or a centralized package registry. Federated Modules allow you to create a more modular and decoupled architecture for your web applications.
 

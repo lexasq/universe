@@ -1,4 +1,4 @@
-= Module Federation: Versioned Shared Modules
+= Versioned Shared Modules
 
 This article covers the enhanced features of Module Federation, focusing on the concept of versioned shared modules. This concept introduces a new system based on the versions of shared modules, thus improving the federated builds' management, especially in complex host-remote relationship scenarios.
 

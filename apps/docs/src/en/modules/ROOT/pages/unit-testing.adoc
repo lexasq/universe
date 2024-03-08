@@ -1,4 +1,4 @@
-= Module Federation: How to Create Unit Tests for Distributed Code
+= How to Create Unit Tests for Distributed Code
 
 In this guide, we'll cover the best practices for creating unit tests for distributed code when using Module Federation. We'll discuss the challenges and advantages of testing federated modules, along with techniques to ensure your tests are thorough and maintainable.
 
@@ -159,7 +159,7 @@ In this example, Jest processes an already-built test file, allowing you to use 
 
 To enable federated testing with Jest, you need a special Webpack build that compiles `.test.js` files only.
 
-[, javascript]
+[source, javascript]
 ----
 // jest test/bundle.test.js
 
