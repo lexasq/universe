@@ -1,4 +1,4 @@
-== Naming conventions for modules and their exports to avoid naming collisions
+== Strategies for Naming Modules and Exports to Prevent Naming Collisions
 
 When using Module Federation you may face some challenges when it comes to naming your modules and their exports. Since you are loading modules from different sources, you need to make sure that they don't conflict with each other or with the host application. Otherwise, you might end up with unexpected behavior, errors, or broken functionality.
 
