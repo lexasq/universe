@@ -82,5 +82,5 @@
 .Vue Specific
 * xref:vue-way/index.adoc[Setting Up Module Federation in a Vue 2 Application]
 
-.Documentation Contribution and Tools
+.Website Contribution and Tools
 * xref:weblate_contribution_guide.adoc[Weblate Contribution Guide]
