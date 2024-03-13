@@ -1,4 +1,4 @@
-= Setting Up Module Federation in an Angular CLI 2 Application
+= Setting Up Module Federation in an Angular CLI Application
 
 The integration of Module Federation with Angular CLI facilitates a modular development approach, allowing for dynamic code loading and sharing across different Angular projects. This guide dives deep into the steps required for this integration, aided by the `@angular-architects/module-federation` plugin.
 

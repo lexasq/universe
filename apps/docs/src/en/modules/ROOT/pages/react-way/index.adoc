@@ -1,4 +1,4 @@
-= Creating Microfrontends Projects with Module Federation and React
+= Micro-frontend Projects with Module Federation and React
 
 This guide walks you through the process of setting up two React applications using Module Federation to share a simple button component between them.
 

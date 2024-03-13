@@ -2,10 +2,6 @@
 
 Historically, Module Federation was limited to Client-Side Rendering (CSR), primarily benefiting Single Page Applications (SPAs). However, the evolving web development landscape has increasingly favored Server-Side Rendering (SSR) for its myriad benefits.
 
-== What is Server-Side Rendering?
-
-Server-Side Rendering is a technique where web applications are rendered on the server, as opposed to the client-side. This method involves the server processing the browser's requested route, generating the corresponding HTML, and transmitting it back to the browser.
-
 == Nx's Push into SSR with Module Federation (From Version 15.4)
 
 With the advent of version 15.4, Nx has introduced Module Federation with SSR support, marking a significant milestone. This fusion of Module Federation and SSR in Nx Workspaces leverages the strengths of both technologies.
