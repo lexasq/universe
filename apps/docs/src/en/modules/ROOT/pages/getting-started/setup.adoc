@@ -24,10 +24,9 @@ To install Module Federation, follow these steps:
 - Create a Webpack configuration file in the root of each application that will be using Module Federation.
 - In each configuration file, add the following code to enable Module Federation:
 
-const { ModuleFederationPlugin } = require("webpack").container;
-
 [source, json]
 ----
+const { ModuleFederationPlugin } = require("webpack").container;
 module.exports = {
   // ...
   plugins: [
