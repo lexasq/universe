@@ -1,6 +1,6 @@
 = Using Dynamic Remotes
 
-This documentation page will discuss how to use dynamic remotes in Module Federation to deploy micro frontend applications across various environments. This guide is intended to provide elaborate and understandable instructions for implementing dynamic remotes in your projects.
+This documentation page will discuss how to use dynamic remotes in Module Federation to deploy micro frontend applications across various environments.
 
 == Overview
 

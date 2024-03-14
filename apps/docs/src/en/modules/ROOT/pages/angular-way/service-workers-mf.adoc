@@ -36,7 +36,7 @@ In Angular, the service worker can adopt one of two primary https://angular.io/g
 
 - **Background Updates**: Service workers facilitate the background updating of federated modules. When a module is updated on the server, the service worker can fetch and cache the new version without interrupting the user's current session.
 
-- **Version Management**: They help in maintaining version consistency across federated modules, ensuring that the application runs smoothly without any dependency conflicts.
+- **Version Management**: They help maintain version consistency across federated modules, ensuring that the application runs smoothly without any dependency conflicts.
 
 
 === Enhancing User Experience
@@ -47,7 +47,7 @@ In Angular, the service worker can adopt one of two primary https://angular.io/g
 
 == Implementing Service Workers in Angular Applications
 
-This section provides a concise guide on setting up service workers in Angular. For comprehensive details, refer to the https://angular.io/guide/service-worker-getting-started[official Angular documentation.]
+This section provides a concise guide on setting up service workers in Angular. For comprehensive details, refer to https://angular.io/guide/service-worker-getting-started[the official Angular documentation.]
 
 To effectively integrate service workers into an Angular application, the initial step is to transform the application into a Progressive Web App (PWA). PWAs are known for their ability to enhance user experience by providing features similar to native apps. To understand the concept of PWAs, their unique benefits, impact on business, and development methodologies, it's recommended to consult the https://web.dev/explore/progressive-web-apps[Progressive Web Apps" page on web.dev]
 
@@ -309,7 +309,7 @@ In this setup, Workbox provides a network-first strategy for API calls and a sta
 
 == Conclusion
 
-In summary, we exploerd two distinct approaches to configuring service workers in Angular applications: using Angular's built-in Service Worker (ngsw) and leveraging Workbox.
+In summary, we explored two distinct approaches to configuring service workers in Angular applications: using Angular's built-in Service Worker (ngsw) and leveraging Workbox.
 
 1. **Angular Service Worker (ngsw)**: This approach offers a straightforward, Angular-centric method for integrating service workers. It's ideal for developers seeking a quick setup with minimal configuration, providing essential functionalities aligned with Angular's ecosystem.
 

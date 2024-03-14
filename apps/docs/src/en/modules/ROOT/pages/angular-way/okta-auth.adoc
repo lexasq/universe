@@ -16,7 +16,7 @@ Module Federation enhances the management of shared code and state across micro 
 1. Register or Log In to Okta:
 +
 - To register for a new account, execute `okta register` in your terminal.
-- If you already have an account, log in by running okta login.
+- If you already have an account, log in by running `okta login`.
 
 2. Create Your Application:
 +

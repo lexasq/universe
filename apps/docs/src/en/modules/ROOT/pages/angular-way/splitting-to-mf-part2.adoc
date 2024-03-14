@@ -130,8 +130,8 @@ NOTE: Instead of using `--type dynamic-host`, we are going to use `--type remote
 
 To rectify this, modify the `webpack.config.js` file:
 
-  - Remove the existing './Component' key.
-  - Add a new './Module' key, ensuring it points to the correct path for loading the application module. For example:
+- Remove the existing './Component' key.
+- Add a new './Module' key, ensuring it points to the correct path for loading the application module. For example:
 +
 [source, javascript]
 ----

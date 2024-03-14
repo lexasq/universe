@@ -1,6 +1,6 @@
 = Authentication for Micro Frontends: Integrating Shared User Context
 
-This documentation outlines the process for sharing authentication states, such as the current user context, across micro frontends within an application shell using Auth0 and Angular.
+This documentation outlines the process for sharing authentication states, such as the current user context, across micro-frontends within an application shell using Auth0 and Angular.
 
 == Overview
 
@@ -151,8 +151,8 @@ module.exports = {
 };
 ----
 
-This configuration ensures a single instance of the `AuthService` is used across your application, facilitating shared authentication state.
+This configuration ensures a single instance of the `AuthService` is used across your application, facilitating a shared authentication state.
 
 ==== Conclusion
 
-Following these steps, you can achieve seamless authentication state sharing across micro frontends in your Angular applications. This setup not only simplifies managing user contexts but also enhances the overall user experience by maintaining consistent authentication states across your application's modular components.
+Following these steps, you can achieve seamless authentication state sharing across micro-frontends in your Angular applications. This setup not only simplifies managing user contexts but also enhances the overall user experience by maintaining consistent authentication states across your application's modular components.

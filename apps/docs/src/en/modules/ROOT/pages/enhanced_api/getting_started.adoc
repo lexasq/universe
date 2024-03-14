@@ -37,7 +37,6 @@ The Enhanced Federation Plugin API extends all behaviors from the Module Federat
 
 == Next Steps
 
-After configuring the Enhanced Federation Plugin API, you're ready to start using its features in your project. Refer to the https://eatures.html[Features] guide for more information on what you can do with the Enhanced Federation Plugin API.
-//TODO: Add internal link
+After configuring the Enhanced Federation Plugin API, you're ready to start using its features in your project. Refer to the xref:enhanced_api/about.adoc[Features] guide for more information on what you can do with the Enhanced Federation Plugin API.
 
 If you encounter any issues or have any questions, feel free to reach out for support.

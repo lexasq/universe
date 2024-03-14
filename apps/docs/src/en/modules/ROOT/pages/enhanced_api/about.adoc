@@ -1,4 +1,4 @@
-= About
+= About Enhanced Federation Plugin API
 
 The Enhanced Federation Plugin API is a powerful tool designed to augment the capabilities of Module Federation, a feature provided by Webpack. This document aims to provide a comprehensive overview of the Enhanced Federation Plugin API, its features, and how it can be used to improve your development workflow.
 

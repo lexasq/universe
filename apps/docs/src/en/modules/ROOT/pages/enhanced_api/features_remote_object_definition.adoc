@@ -4,7 +4,9 @@ The Enhanced Federation Plugin API introduces a feature called Remote Object Def
 
 == Creating a Remote Object Definition
 
-To create a Remote Object Definition, you need to define the remotes in your `ModuleFederationEnhancedPlugin` configuration. Here's an example:
+To create a Remote Object Definition, you need to define the remotes in your `ModuleFederationEnhancedPlugin` configuration. 
+
+Here's an example:
 
 [source, javascript]
 ----
@@ -48,6 +50,6 @@ The properties for the object definition are:
 - `remoteEntry`: The name of the remoteEntry file you are using. If you use the default and widely used `remoteEntry.js`, no need to fill this up. This can be a string or a function.
 - `async`: The property you can use to disable the async behavior for a specific remote. This is a boolean.
 
-If you decide to disable the async behavior for any remote, the plugin will convert your object to string-based configuration.
+If you decide to disable the async behavior for any remote, the plugin will convert your object to a string-based configuration.
 
 The Remote Object Definition feature of the Enhanced Federation Plugin API provides a flexible way to define and manage your remotes. We hope this guide has been helpful in understanding and using this feature. Happy coding!

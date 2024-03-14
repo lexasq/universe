@@ -15,7 +15,7 @@ To address this, the Enhanced Federation Plugin API provides a feature called `d
 The `dynamicLoad` function follows these steps:
 
 1. Get `remoteUrlMap` to know remotes.
-2. Dynamically register by calling `getModule`.
+2. Dynamically register by calling xref:enhanced_api/helper_dynamicLoad.adoc[`getModule`].
 3. List all remotes available for consumption using `moduleNameList` for each remote.
 4. Load all modules for each remote.
 5. Return all modules to the app-shell, root-remote.

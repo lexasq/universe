@@ -93,12 +93,12 @@ This builds the browser and server bundles for the 'login' application and runs 
 
 === Module Federation in Action
 
-- Initially, Angular Universal will handle rendering, and subsequent navigations will switch to Client-Side Rendering (CSR).
+- Initially, Angular Universal will handle rendering, and subsequent navigation will switch to Client-Side Rendering (CSR).
 - Navigating to http://localhost:4200/login will reveal the server-rendered HTML for the login page, showcasing Module Federation's ability to resolve and render modules from remote servers.
 
 === Live Updates for the Login Application
 
-If you are actively working on the 'login' application and need to see the results of your changes in real-time, you can enable server rebuilds upon code modification. This can be achieved by using the `devRemotes` flag:
+If you are actively working on the 'login' application and need to see the results of your changes in real time, you can enable server rebuilds upon code modification. This can be achieved by using the `devRemotes` flag:
 
 [source, bash]
 ----

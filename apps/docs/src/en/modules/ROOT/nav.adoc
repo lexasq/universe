@@ -53,17 +53,16 @@
 ** xref:enhanced_api/about.adoc[About]
 ** xref:enhanced_api/installation.adoc[Installation]
 ** xref:enhanced_api/getting_started.adoc[Getting Started]
-* Features
-** xref:enhanced_api/features_default_async.adoc[Default Async]
-** xref:enhanced_api/features_module_name_map.adoc[Modules' Name Map]
-** xref:enhanced_api/features_remotes_name_map.adoc[Remotes' Name Map]
-** xref:enhanced_api/features_remotes_url.adoc[Remotes' URL]
-** xref:enhanced_api/features_remote_object_definition.adoc[Object Definition]
+** xref:enhanced_api/features_default_async.adoc[Feature: Default Async]
+** xref:enhanced_api/features_module_name_map.adoc[Feature: Modules' Name Map]
+** xref:enhanced_api/features_remotes_name_map.adoc[Feature: Remotes' Name Map]
+** xref:enhanced_api/features_remotes_url.adoc[Feature: Remotes' URL]
+** xref:enhanced_api/features_remote_object_definition.adoc[Feature: Object Definition]
 * Helper
 ** xref:enhanced_api/helper_about.adoc[About]
 ** xref:enhanced_api/helper_installation.adoc[Install]
-** xref:enhanced_api/helper_getModule.adoc[getModule]
-** xref:enhanced_api/helper_dynamicLoad.adoc[dynamicLoad]
+** xref:enhanced_api/helper_getModule.adoc[Feature: getModule]
+** xref:enhanced_api/helper_dynamicLoad.adoc[Feature: dynamicLoad]
 
 .Angular Specific
 * xref:angular-way/index.adoc[Setting Up MF in an Angular CLI Application]

@@ -138,4 +138,4 @@ module.exports = {
 
 This configuration sets up Module Federation in `MFE1`, exposing the Button component through `http://localhost:8083/remoteEntry.js`. When you run the development server, Webpack renders this on `http://localhost:8083.`
 
-The guide above sets the foundation for creating microfrontend projects with Module Federation and React. You can now proceed to configure `MFE2` to consume the `Button` component from `MFE1` and further extend your microfrontends setup as needed.
+The guide above sets the foundation for creating micro-frontend projects with Module Federation and React. You can now proceed to configure `MFE2` to consume the `Button` component from `MFE1` and further extend your micro-frontends setup as needed.

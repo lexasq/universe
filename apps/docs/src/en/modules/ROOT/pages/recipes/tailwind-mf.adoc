@@ -242,7 +242,7 @@ By balancing the technical solution with the developer experience, this approach
 
 ==== Prerequisites
 
-For those new to microfrontends and Module Federation, I recommend starting with the "Getting Started with Module Federation" article, which provides an excellent foundation for understanding these concepts.
+For those new to micro-frontends and Module Federation, I recommend starting with the "Getting Started with Module Federation" article, which provides an excellent foundation for understanding these concepts.
 
 ====  Adding TailwindCSS in an Nx Workspace
 
@@ -264,7 +264,7 @@ npx nx generate @nrwl/angular:setup-tailwind [remoteName]
 +
 Replace `[remoteName]` with your application's name. This step configures `tailwind.config.js` and updates the global stylesheet with Tailwind imports.
 +
-3. **Adjusting Global Stylesheet**: In a microfrontend architecture, the global stylesheet isn't exposed, necessitating a different approach. For the moment, remove the Tailwind imports from the global stylesheet:
+3. **Adjusting Global Stylesheet**: In a micro-frontend architecture, the global stylesheet isn't exposed, necessitating a different approach. For the moment, remove the Tailwind imports from the global stylesheet:
 +
 [source, css]
 ----
@@ -274,9 +274,9 @@ Replace `[remoteName]` with your application's name. This step configures `tailw
 
 ==== Implementing the Proxy Pattern
 
-To share Tailwind styles across microfrontends, we employ a ProxyComponent pattern.
+To share Tailwind styles across micro-frontends, we employ a ProxyComponent pattern.
 
-1. **Creating the ProxyComponent**: This component acts as a wrapper for the entire microfrontend. Include the Tailwind imports in the ProxyComponent's stylesheet:
+1. **Creating the ProxyComponent**: This component acts as a wrapper for the entire micro-frontend. Include the Tailwind imports in the ProxyComponent's stylesheet:
 +
 [source, css]
 ----

@@ -1,8 +1,8 @@
-= Microfrontends with Angular and Webpack Module Federation
+= Micro-frontends with Angular and Webpack Module Federation
 
 == Overview
 
-Module Federation has been a game-changer in the microfrontends landscape. When combined with Angular, it offers a robust and scalable solution for distributed front-end architecture. This guide goes beyond the basics and explores a practical example, detailing how to configure the Webpack `ModuleFederationPlugin` in an Angular shell and a remote application.
+Module Federation has been a game-changer in the micro-frontends landscape. When combined with Angular, it offers a robust and scalable solution for distributed front-end architecture. This guide goes beyond the basics and explores a practical example, detailing how to configure the Webpack `ModuleFederationPlugin` in an Angular shell and a remote application.
 
 Prerequisites
 Before diving into the setup, ensure you meet the following prerequisites:
@@ -344,7 +344,7 @@ This guide has walked you through the dynamic integration of remote modules in a
 
 - How to set up Yarn as your package manager.
 - Customizing the Webpack configuration for your Angular build.
-- Utilizing Module Federation in both shell and microfrontend applications.
+- Utilizing Module Federation in both shell and micro-frontend applications.
 - Lazy-loading remote modules in Angular routing.
 - Dynamically creating components from remote modules.
 
