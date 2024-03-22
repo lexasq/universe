@@ -1,0 +1,1012 @@
+= Module Federation Runtime Plugin Documentation
+
+The Module Federation Runtime Plugin is a powerful tool designed to enhance the efficiency and performance of your JavaScript applications by optimizing module sharing and loading processes.
+
+Key Features of the Module Federation Runtime Plugin include:
+
+1. **Enhanced Dependency Sharing:** By integrating with the build plugin, the Module Federation Runtime Plugin enables the sharing of basic dependencies across different applications according to predefined policies. This capability significantly reduces the number of module downloads, accelerating the loading speed of your applications and improving overall user experience.
+
+2. **Selective Module Consumption:** The plugin offers the flexibility to consume only the necessary parts of a remote module's export, avoiding the full download of the entire module. This selective approach optimizes resource utilization, ensuring that applications load only what they need, when they need it, thus enhancing performance and efficiency.
+
+3. **Extensible Runtime Calling Process:** With the Module Federation Runtime Plugin, developers can extend the runtime calling process through a modular plugin mechanism. This feature allows for the customization and extension of runtime behavior, enabling developers to tailor the module federation process to their specific requirements and workflows.
+
+== API
+
+=== `init` Function
+
+==== Description
+
+The `init` function creates a runtime instance capable of dynamically registering remote modules. Despite the ability to re-call this function, it maintains only one runtime instance at any given time to ensure consistency and prevent duplication.
+
+==== Type
+
+[source, javascript]
+----
+init(options: InitOptions): void
+----
+
+==== Parameters
+
+- **options** (`InitOptions`): Configuration object for initializing the runtime instance.
+
+===== `InitOptions` Structure
+
+- **name** (`string`): Specifies the name of the current host application. This is essential for identifying the application within the module federation ecosystem.
+
+- **version** (`string`, optional): Defines the version of the current host. The runtime will use this version to match with the corresponding online version. This ensures compatibility and version consistency across federated modules. remoteInfo in remotes will use the online version.
+
+- **region** (`EnhancedRegion`, optional): Indicates the deployment region of the module, facilitating data transmission between the consumer and producer. If the producer's data cannot be accessed, the system automatically retrieves backup data based on this setting.
+
+- **remotes** (`Array<RemoteInfo>`): An array detailing the remote modules upon which the host depends.
++
+NOTE: Remotes configured at runtime may differ from those specified in the build plugin, particularly concerning versioning semantics (*, ^, ~).
+
+- **shared** (`ShareInfos`, optional): Lists the dependencies that the host application intends to share. When using the build plugin, these dependencies are configured and injected at build time. For runtime, these must be explicitly passed with version reference, as direct injection is not possible.
+
+===== `RemoteInfo` Structure
+
+Combines `RemotesWithEntry` or `RemotesWithVersion` with an optional alias:
+
+- **alias** (`string`, optional): An alternative name to reference the remote module.
+
+`RemotesWithVersion`:
+
+- **name** (`string`): The remote module's name.
+- **version** (`string`): The version of the remote module.
+
+`RemotesWithEntry`:
+
+- **name** (`string`): The remote module's name.
+- **entry** (`string`): The entry point URL for the remote module.
+
+===== `ShareInfos` Structure
+
+Dependent package name, dependent basic information, and sharing strategy
+
+- **[pkgName]** (`Share`): The configuration for each shared dependency.
+
+===== `Share` Structure
+
+- **version** (`string`): Specifies the version of the shared dependency.
+- **useIn** (`Array<string>`, optional): Lists the modules consuming the shared dependency.
+- **from** (`string`, optional): Indicates the source module of the shared dependency.
+- **lib** (`() => Module`): A factory function to get the shared dependency instance, useful when the cache fails.
+- **shareConfig** (`SharedConfig`, optional): Defines the sharing strategy to determine dependency reuse.
+- **deps** (`Array<string>`, optional): Lists interdependencies among shared items.
+- **scope** (`string | Array<string>`, optional): Specifies the scope under which the shared dependencies are placed, with a default value of 'default'.
+
+=== Usage Example
+
+[source, javascript]
+----
+init({
+  name: 'app-host',
+  version: '1.0.0',
+  region: 'us-west',
+  remotes: [
+    {
+      name: 'app-remote',
+      entry: 'http://localhost:3000/remoteEntry.js',
+    },
+  ],
+  shared: {
+    'my-lib': {
+      version: '2.1.0',
+      lib: () => import('my-lib'),
+      shareConfig: {
+        singleton: true,
+      },
+    },
+  },
+});
+----
+
+This function call initializes the runtime environment for 'app-host', setting up remote module 'app-remote' and sharing 'my-lib' according to the specified configuration.
+
+=== `loadRemote` Function
+
+==== Description
+
+The `loadRemote` function is employed to load modules that have been initialized and are available remotely. When integrated with build plugins, this function allows modules to be loaded using the native `import("remoteName/expose")` syntax. During runtime, the build plugin automatically translates this syntax into `loadRemote` calls, ensuring consistent and efficient module loading.
+
+==== Type
+
+[source, javascript]
+----
+loadRemote(id: string)
+----
+
+==== Parameters
+
+- **id** (`string`): A unique identifier for the remote module to be loaded. This identifier can either be a combination of the remote name and the exposed module (e.g., `remoteName/expose`) or an alias defined during the initialization phase.
+
+==== Usage Examples
+
+===== Loading by Remote Name and Expose
+
+[source, javascript]
+----
+import { init, loadRemote } from '@module-federation/runtime';
+
+init({
+  name: '@demo/main-app',
+  remotes: [
+    {
+      name: '@demo/app2',
+      alias: 'app2',
+      entry: 'http://localhost:3006/remoteEntry.js',
+    },
+  ],
+});
+
+loadRemote('@demo/app2/util').then((module) => {
+  module.add(1, 2, 3);
+});
+----
+
+In this example, `loadRemote` is used to load the `util` module exposed by `@demo/app2`. Once loaded, the `add` function from the module is invoked.
+
+===== Loading by Alias and Expose
+
+[source, javascript]
+----
+loadRemote('app2/util').then((module) => {
+  module.add(1, 2, 3);
+});
+----
+
+Here, `loadRemote` loads the `util` module using the alias `app2` defined during initialization. Upon successful loading, the `add` function within the module is executed.
+
+[NOTE]
+====
+The `loadRemote` function returns a promise that resolves with the module instance, providing access to the exported features of the loaded module. This asynchronous nature ensures that module loading does not block the execution of other scripts, maintaining the application's responsiveness and performance.
+====
+
+=== `loadShare` Function
+
+==== Description
+
+`loadShare` is designed to retrieve shared dependencies that are available globally. If there are matching shared dependencies for the current host, the function prioritizes reusing these existing dependencies. If no suitable shared dependencies are found, the function loads the host's own dependencies and stores them in the global cache for potential reuse. Although `loadShare` is primarily used by build plugins to manage dependencies, it can be directly invoked when necessary.
+
+==== Type
+
+[source, javascript]
+----
+loadShare(pkgName: string)
+----
+
+==== Parameters
+
+- **pkgName** (`string`): The name of the package whose shared instance is to be retrieved.
+
+==== Usage Example
+
+[source, javascript]
+----
+import { init, loadRemote, loadShare } from '@module-federation/runtime';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+init({
+  name: '@demo/main-app',
+  remotes: [],
+  shared: {
+    react: {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+    'react-dom': {
+      version: '17.0.0',
+      scope: 'default',
+      lib: () => ReactDOM,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+  },
+});
+
+loadShare('react').then((reactFactory) => {
+  console.log(reactFactory());
+});
+----
+
+In this example, the `loadShare` function is used to retrieve the shared instance of React. The initialization configures React and ReactDOM as shared dependencies. When `loadShare('react')` is called, it either reuses an existing React instance that matches the host's requirements or loads a new instance if no suitable shared instance exists.
+
+[NOTE]
+====
+The `loadShare` function returns a promise that resolves to the factory function of the shared module. This asynchronous approach ensures that dependency loading is non-blocking, maintaining the application's responsiveness. While typically utilized by build plugins, `loadShare` provides the flexibility to be directly invoked for advanced use cases, offering fine-grained control over shared dependency management.
+====
+
+=== `preloadRemote` Function
+// TODO: REVIEW THIS ONCE AGAIN
+==== Description
+
+`preloadRemote` is used to preload remote assets, such as `remoteEntry.js`, as well as other resources required by remote modules. By preloading these assets, applications can avoid the performance penalties associated with waterfall loading patterns. This function is particularly useful in scenarios where you expect the need for certain remote modules and want to load their assets in advance.
+
+==== Type
+
+[source, javascript]
+----
+preloadRemote(preloadOptions: Array<PreloadRemoteArgs>)
+----
+
+==== Parameters
+
+- **preloadOptions** (`Array<PreloadRemoteArgs>`): An array of objects specifying the details of the remote assets to be preloaded.
+
+==== `PreloadRemoteArgs` Structure
+
+- **nameOrAlias** (`string`): The name or alias of the remote module whose assets are to be preloaded.
+- **exposes** (`Array<string>`, optional): A list of specific exposes to preload. If omitted, all exposes are preloaded.
+- **resourceCategory** (`'all' | 'sync'`, optional): Specifies whether to preload only synchronous code (`'sync'`) or both synchronous and asynchronous code (`'all'`).
+- **depsRemote** (`boolean | Array<depsPreloadArg>`, optional): Indicates whether to preload dependencies of the remote module. If an array is provided, it specifies which dependencies to preload.
+- **filter** (`(assetUrl: string) => boolean`, optional): A function to filter assets to be preloaded based on their URLs.
+
+==== Usage Example
+
+[source, javascript]
+----
+import { init, preloadRemote } from '@module-federation/runtime';
+
+init({
+  name: '@demo/preload-remote',
+  remotes: [
+    { name: '@demo/sub1', entry: 'http://localhost:2001/mf-manifest.json' },
+    { name: '@demo/sub2', entry: 'http://localhost:2001/mf-manifest.json' },
+    { name: '@demo/sub3', entry: 'http://localhost:2001/mf-manifest.json' },
+  ],
+});
+
+preloadRemote([
+  {
+    nameOrAlias: '@demo/sub1',
+    filter: (assetUrl) => assetUrl.indexOf('ignore') === -1,
+    depsRemote: [{ nameOrAlias: '@demo/sub1-button' }],
+  },
+  {
+    nameOrAlias: '@demo/sub2',
+    resourceCategory: 'all',
+  },
+  {
+    nameOrAlias: '@demo/sub3',
+    resourceCategory: 'all',
+    exposes: ['add'],
+  },
+]);
+----
+
+In this example, `preloadRemote` is configured to preload assets for three different modules, each with specific criteria for what should be preloaded. For instance, for `@demo/sub1`, it filters out assets containing 'ignore' in their URL and preloads only the necessary dependencies, such as `@demo/sub1-button`.
+
+[NOTE]
+====
+`preloadRemote` can significantly enhance the user experience by reducing load times and preventing delays when accessing remote modules. It is a powerful tool for optimizing the performance of applications that rely on module federation.
+====
+
+=== `registerRemotes` Function
+
+==== Description
+
+`registerRemotes` is utilized to add new remote modules or update existing ones after the initial setup has been completed. This dynamic registration capability is vital for applications that need to adapt to new modules or versions after they have started.
+
+==== Type
+
+[source, javascript]
+----
+function registerRemotes(remotes: Remote[], options?: { force?: boolean }): void
+----
+
+==== Parameters
+
+- **remotes** (`Array<Remote>`): An array detailing the remote modules to be registered or updated.
+- **options** (`{ force?: boolean }`, optional): Configuration options for remote registration. The `force` option, when set to `true`, allows the function to override existing remote modules, which includes merging remote configurations and clearing the loaded remote cache.
+
+===== `Remote` Structure
+
+A `Remote` object can be one of two types, merged with common remote information:
+
+- **RemoteWithEntry**: Specifies a remote module by its entry point.
+- **RemoteWithVersion**: Defines a remote module by its version.
+
+===== Common Remote Information (`RemoteInfoCommon`)
+
+- **alias** (`string`, optional): An alternative identifier for the remote module.
+- **shareScope** (`string`, optional): The scope under which the shared dependencies of the remote are placed.
+- **type** (`RemoteEntryType`, optional): The type of the remote entry.
+- **entryGlobalName** (`string`, optional): The global name used in the remote entry file.
+
+===== `RemoteWithEntry` Interface
+
+- **name** (`string`): The name of the remote module.
+- **entry** (`string`): The URL or path to the remote module's entry point.
+
+===== `RemoteWithVersion` Interface
+
+- **name** (`string`): The name of the remote module.
+- **version** (`string`): The version of the remote module.
+
+==== Usage Example
+
+[source, javascript]
+----
+import { init, registerRemotes } from '@module-federation/runtime';
+
+init({
+  name: '@demo/register-new-remotes',
+  remotes: [
+    {
+      name: '@demo/sub1',
+      entry: 'http://localhost:2001/mf-manifest.json',
+    }
+  ],
+});
+
+// Add a new remote module
+registerRemotes([
+  {
+    name: '@demo/sub2',
+    entry: 'http://localhost:2002/mf-manifest.json',
+  }
+]);
+
+// Update an existing remote module
+registerRemotes([
+  {
+    name: '@demo/sub1',
+    entry: 'http://localhost:2003/mf-manifest.json',
+  }
+], { force: true });
+----
+
+In this example, `registerRemotes` is first used to add a new remote module, `@demo/sub2`. It is then used again to update the existing remote module `@demo/sub1` with a new entry point, leveraging the `force` option to ensure the update is applied.
+
+[NOTE]
+====
+Using the `force` option with `true` in `registerRemotes` merges the new remote configuration with the existing one, including any previously loaded remotes. This action also clears the remote module cache. A warning message will be displayed in the console to indicate the potential risks associated with this operation. Exercise caution when employing the `force` option, as it may lead to unexpected outcomes, particularly in scenarios where module consistency and stability are crucial.
+====
+
+== Lifecycle Hooks
+
+Lifecycle hooks offer interaction points within the Module Federation framework, allowing developers to inject custom logic at various stages of the Federation Host's lifecycle. These hooks provide a powerful way to customize and extend the behavior of your federated modules and their interactions.
+
+=== Example Usage of Lifecycle Hooks
+
+[source, javascript]
+----
+import { init } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
+
+const runtimePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'my-runtime-plugin',
+    beforeInit(args) {
+      console.log('beforeInit: ', args);
+      return args;
+    },
+    beforeRequest(args) {
+      console.log('beforeRequest: ', args);
+      return args;
+    },
+    afterResolve(args) {
+      console.log('afterResolve', args);
+      return args;
+    },
+    onLoad(args) {
+      console.log('onLoad: ', args);
+      return args;
+    },
+    async loadShare(args) {
+      console.log('loadShare:', args);
+    },
+    async beforeLoadShare(args) {
+      console.log('beforeLoadShare:', args);
+      return args;
+    },
+  };
+};
+
+init({
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: '@demo/app2',
+      entry: 'http://localhost:3006/remoteEntry.js',
+      alias: 'app2',
+    },
+  ],
+  plugins: [runtimePlugin()],
+});
+----
+
+In this example, a `runtimePlugin` is defined with several lifecycle hooks, each logging its respective lifecycle event to the console. This plugin is then registered with the Federation Host during initialization.
+
+=== `beforeInit` Hook
+_SyncWaterfallHook_
+
+==== Description
+
+The `beforeInit` hook allows you to modify the Federation Host configurations before the initialization process of remote containers begins.
+
+==== Type
+
+[source, javascript]
+----
+function beforeInit(args: BeforeInitOptions): BeforeInitOptions;
+
+type BeforeInitOptions = {
+  userOptions: UserOptions;
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+  shareInfo: ShareInfos;
+};
+
+interface FederationRuntimeOptions {
+  id?: string;
+  name: string;
+  version?: string;
+  remotes: Array<Remote>;
+  shared: ShareInfos;
+  plugins: Array<FederationRuntimePlugin>;
+  inBrowser: boolean;
+}
+----
+
+==== `BeforeInitOptions` Structure
+
+- **userOptions** (`UserOptions`): The options provided by the user when initializing the host.
+- **options** (`FederationRuntimeOptions`): The processed options that will be used by the federation runtime.
+- **origin** (`FederationHost`): The original federation host instance.
+- **shareInfo** (`ShareInfos`): Information about the shared modules.
+
+==== `FederationRuntimeOptions` Interface
+
+- **id** (`string`, optional): An identifier for the runtime instance.
+- **name** (`string`): The name of the host application.
+- **version** (`string`, optional): The version of the host application.
+- **remotes** (`Array<Remote>`): An array detailing the remote modules.
+- **shared** (`ShareInfos`): Descriptions of the shared dependencies.
+- **plugins** (`Array<FederationRuntimePlugin>`): Registered plugins for the federation runtime.
+- **inBrowser** (`boolean`): Indicates whether the runtime is executed in a browser environment.
+
+=== `init` Hook
+
+__SyncHook__
+
+==== Description
+
+Implementing custom logic within the `init` hook allows developers to influence the initialization phase of the federation process, ensuring that any specific requirements or configurations are met before the federation runtime becomes active.
+
+==== Type
+
+[source, javsscript]
+----
+function init(args: InitOptions): void;
+
+type InitOptions = {
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+};
+----
+
+==== Parameters
+
+- **args** (`InitOptions`): Parameters supplied to the hook, containing contextual information and configuration details relevant to the initialization process.
+
+==== `InitOptions` Structure
+
+- **options** (`FederationRuntimeOptions`): Represents the configuration options applied to the federation runtime during initialization.
+- **origin** (`FederationHost`): The Federation Host instance that is being initialized, providing a reference to the host within the federation context.
+
+=== `beforeRequest` Hook
+
+__AsyncWaterfallHook__
+
+==== Overview
+
+The `beforeRequest` lifecycle hook provides a strategic intervention point before the resolution process of a remote container. This asynchronous hook allows for dynamic modifications or preparations to be made ahead of container resolution, enhancing flexibility and control.
+
+This capability is particularly useful for scenarios where the resolution process needs to be augmented with additional data, customized logic, or pre-fetching operations to ensure that the remote container is resolved in a manner that aligns with the application's requirements or constraints.
+
+==== Type
+
+[source, javscript]
+----
+async function beforeRequest(args: BeforeRequestOptions): Promise<BeforeRequestOptions>;
+
+type BeforeRequestOptions = {
+  id: string;
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+};
+----
+
+==== Parameters
+
+- **args** (`BeforeRequestOptions`): The arguments provided to the hook, containing essential details required for processing the request.
+
+===== `BeforeRequestOptions` Structure
+
+- **id** (`string`): A unique identifier for the request, typically used to track or reference the request within the federation system.
+- **options** (`FederationRuntimeOptions`): Configuration options that define the runtime behavior and settings for the federation process.
+- **origin** (`FederationHost`): The instance of the Federation Host from which the request originates, providing context and reference for the request handling.
+
+=== `afterResolve` Hook
+
+__AsyncWaterfallHook__
+
+==== Description
+
+The `afterResolve` lifecycle hook is executed once a remote container has been successfully resolved, allowing developers to modify the resolved information or perform post-resolution actions. This can include actions like logging for monitoring purposes, applying transformations to the resolved data, or enforcing additional checks and balances based on the resolved information.
+
+==== Type
+
+[source, javascript]
+----
+async function afterResolve(args: AfterResolveOptions): Promise<AfterResolveOptions>;
+
+type AfterResolveOptions = {
+  id: string;
+  pkgNameOrAlias: string;
+  expose: string;
+  remote: Remote;
+  options: FederationRuntimeOptions;
+  origin: FederationHost;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot?: ModuleInfo;
+};
+----
+
+==== Parameters
+
+- **args** (`AfterResolveOptions`): Parameters supplied to the hook, detailing the context and data related to the resolved container.
+
+===== `AfterResolveOptions` Structure
+
+- **id** (`string`): The unique identifier for the resolve operation, facilitating tracking and identification within the federation process.
+- **pkgNameOrAlias** (`string`): The package name or alias used in the resolve operation, providing clarity on the target of the resolution.
+- **expose** (`string`): The specific expose within the remote container that has been resolved, indicating the resolved module or asset.
+- **remote** (`Remote`): The remote module information, offering details about the source of the resolved container.
+- **options** (`FederationRuntimeOptions`): The runtime options applied during the resolution, outlining the configuration and operational context.
+- **origin** (`FederationHost`): The Federation Host instance from which the resolution was initiated, providing a reference point within the federation ecosystem.
+- **remoteInfo** (`RemoteInfo`): Information about the remote container, offering insights into the resolved entity.
+- **remoteSnapshot** (`ModuleInfo`, optional): An optional snapshot of the module information post-resolution, providing a detailed view of the resolved state.
+
+=== `onLoad` Hook
+
+__AsyncHook__
+
+==== Description
+
+The `onLoad` hook in the Module Federation Runtime is an asynchronous hook triggered after a federated module is fully loaded. This hook allows developers to access and potentially modify the exports of the loaded module, providing a powerful mechanism to interact with the module post-load.
+
+==== Type
+
+[source, javascript]
+----
+async function onLoad(args: OnLoadOptions): Promise<void>;
+
+type OnLoadOptions = {
+  id: string;
+  expose: string;
+  pkgNameOrAlias: string;
+  remote: Remote;
+  options: ModuleOptions;
+  origin: FederationHost;
+  exposeModule: any;
+  exposeModuleFactory: any;
+  moduleInstance: Module;
+};
+
+type ModuleOptions = {
+  remoteInfo: RemoteInfo;
+  host: FederationHost;
+};
+
+interface RemoteInfo {
+  name: string;
+  version?: string;
+  buildVersion?: string;
+  entry: string;
+  type: RemoteEntryType;
+  entryGlobalName: string;
+  shareScope: string;
+}
+----
+
+==== Parameters
+
+- **args** (`OnLoadOptions`): Contextual details and options related to the loaded module.
+
+===== `OnLoadOptions` Structure
+
+- **id** (`string`): An identifier for the load operation, aiding in tracking and managing the module's loading process.
+- **expose** (`string`): The expose identifier within the remote module, pinpointing the specific asset or module section that was loaded.
+- **pkgNameOrAlias** (`string`): The name or alias of the package from which the module was loaded, facilitating reference and interaction.
+- **remote** (`Remote`): Information about the remote module source, providing context for the loaded module.
+- **options** (`ModuleOptions`): Configuration and operational details pertinent to the loaded module.
+- **origin** (`FederationHost`): The Federation Host instance initiating the module load, offering contextual relevance within the federation ecosystem.
+- **exposeModule** (`any`): The actual loaded module instance, granting direct access to its functionalities and exports.
+- **exposeModuleFactory** (`any`): The factory or construction mechanism for the module, offering insights into the module's instantiation.
+- **moduleInstance** (`Module`): An instance of the loaded module, allowing further interaction and customization post-load.
+
+===== `ModuleOptions` Structure
+
+- **remoteInfo** (`RemoteInfo`): Metadata and configuration details about the remote module.
+- **host** (`FederationHost`): The Federation Host associated with the module loading, situating the operation within the federation framework.
+
+===== `RemoteInfo` Interface
+
+- **name** (`string`): The remote module's name, essential for identification within the federation landscape.
+- **version** (`string`, optional): The version of the remote module, if specified, helping in version control and compatibility.
+- **buildVersion** (`string`, optional): A build-specific version detail, providing additional version granularity.
+- **entry** (`string`): The entry point URL or path for the remote module, crucial for module access and loading.
+- **type** (`RemoteEntryType`): The classification of the entry point, which may influence loading and integration strategies.
+- **entryGlobalName** (`string`): A global identifier for the module entry, relevant in scenarios where global access is necessary.
+- **shareScope** (`string`): The scope under which shared dependencies are managed, pertinent to the module's operational context.
+
+=== `handlePreloadModule` Hook
+
+__SyncHook__
+
+==== Description
+
+The `handlePreloadModule` hook is a synchronous hook and is invoked during the preloading phase of federated modules, providing an opportunity to manipulate or adjust the preloading logic. By tapping into this hook, developers can implement custom preloading strategies, modify the preloading sequence, or inject additional logic to optimize the preloading process.
+
+==== Type
+
+[source, javascript]
+----
+function handlePreloadModule(args: HandlePreloadModuleOptions): void;
+
+type HandlePreloadModuleOptions = {
+  id: string;
+  name: string;
+  remoteSnapshot: ModuleInfo;
+  preloadConfig: PreloadRemoteArgs;
+};
+----
+
+==== Parameters
+
+- **args** (`HandlePreloadModuleOptions`): Parameters provided to the hook, containing information essential for handling the module's preloading logic.
+
+===== `HandlePreloadModuleOptions` Structure
+
+- **id** (`string`): A unique identifier for the preload operation, aiding in the identification and management of the preloading process.
+- **name** (`string`): The name of the module being preloaded, essential for referencing and interacting with the specific module.
+- **remoteSnapshot** (`ModuleInfo`): Information about the remote module at the time of preloading, offering insights into the module's state and metadata.
+- **preloadConfig** (`PreloadRemoteArgs`): The configuration details for the preloading operation, outlining the specifics of how the module should be preloaded.
+
+=== `errorLoadRemote` Hook
+
+__AsyncHook__
+
+==== Overview
+
+The `errorLoadRemote` hook is an asynchronous hook that is called whenever there is a failure in loading a federated module. It offers an opportunity to handle the error in a customized manner, whether by providing fallback content, logging the error for diagnostics, or triggering alternative workflows to maintain application stability.
+
+==== Type
+
+[source, javascript]
+----
+async function errorLoadRemote(args: ErrorLoadRemoteOptions): Promise<void | unknown>;
+
+type ErrorLoadRemoteOptions = {
+  id: string;
+  error: unknown;
+  from: 'build' | 'runtime';
+  origin: FederationHost;
+};
+----
+
+==== Parameters
+
+- **args** (`ErrorLoadRemoteOptions`): Details about the loading error and the context in which it occurred.
+
+===== `ErrorLoadRemoteOptions` Structure
+
+- **id** (`string`): An identifier for the load operation, useful for tracking and referencing the specific instance where the error occurred.
+- **error** (`unknown`): The error object or information related to the failure, providing details that can be used for handling or logging.
+- **from** (`'build' | 'runtime'`): Indicates the phase in which the error occurred, distinguishing between build-time and runtime errors.
+- **origin** (`FederationHost`): The Federation Host associated with the load operation, providing context for the error handling process.
+
+==== Usage Example
+
+[source, javascript]
+----
+import { init, loadRemote } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
+
+const fallbackPlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'fallback-plugin',
+    errorLoadRemote(args) {
+      // Custom error handling logic
+      console.error('Loading error:', args.error);
+      return 'fallback'; // Provide a fallback or handle the error appropriately
+    },
+  };
+};
+
+init({
+  name: '@demo/app-main',
+  remotes: [
+    {
+      name: '@demo/app2',
+      entry: 'http://localhost:3006/remoteEntry.js',
+      alias: 'app2',
+    },
+  ],
+  plugins: [fallbackPlugin()],
+});
+
+loadRemote('app2/un-existed-module').then((mod) => {
+  expect(mod).toEqual('fallback');
+});
+----
+
+In this example, a `fallbackPlugin` is defined to handle loading errors. When a module fails to load, the plugin logs the error and provides a fallback, demonstrating how `errorLoadRemote` can be used to enhance resilience and user experience in federated applications.
+
+=== `beforeLoadShare` Hook
+
+__AsyncWaterfallHook__
+
+==== Description
+
+The `beforeLoadShare` hook is an asynchronous waterfall hook that is invoked before the loading or negotiation of shared modules between federated applications begins. This hook offers an opportunity to intervene and customize the behavior or configuration of shared modules prior to their actual loading.
+
+==== Type
+
+[source, javascript]
+----
+async function beforeLoadShare(args: BeforeLoadShareOptions): Promise<BeforeLoadShareOptions>;
+
+type BeforeLoadShareOptions = {
+  pkgName: string;
+  shareInfo?: Shared;
+  shared: Options['shared'];
+  origin: FederationHost;
+};
+----
+
+==== Parameters
+
+- **args** (`BeforeLoadShareOptions`): The arguments provided to the hook, containing details crucial for the pre-loading configuration of shared modules.
+
+===== `BeforeLoadShareOptions` Structure
+
+- **pkgName** (`string`): The name of the package that is about to be loaded, serving as a key identifier in the shared module process.
+- **shareInfo** (`Shared`, optional): Detailed information about the shared module, including its current configuration and status.
+- **shared** (`Options['shared']`): The global shared configuration that applies to the module, outlining how it should be shared across federated boundaries.
+- **origin** (`FederationHost`): The Federation Host instance from which the shared module loading is being initiated, providing context for the operation.
+
+=== `resolveShare` Hook
+
+__SyncWaterfallHook__
+
+==== Description
+
+The `resolveShare` hook is a synchronous waterfall hook that enables the manual resolution of shared module requests. This hook allows developers to define custom resolution logic for shared modules, ensuring that the correct version or instance of a module is used across federated applications.
+
+==== Type
+
+[source, javascript]
+----
+function resolveShare(args: ResolveShareOptions): ResolveShareOptions;
+
+type ResolveShareOptions = {
+  shareScopeMap: ShareScopeMap;
+  scope: string;
+  pkgName: string;
+  version: string;
+  GlobalFederation: Federation;
+  resolver: () => Shared | undefined;
+};
+----
+
+
+==== Parameters
+
+- **args** (`ResolveShareOptions`): Arguments provided to the hook, containing essential information for resolving the shared module.
+
+===== `ResolveShareOptions` Structure
+
+- **shareScopeMap** (`ShareScopeMap`): A map detailing the current shared scope, providing context for where and how shared modules are registered and resolved.
+- **scope** (`string`): The scope under which the shared module is being resolved, aiding in the contextual resolution of the module.
+- **pkgName** (`string`): The name of the package being resolved, which is crucial for identifying the specific module within the shared scope.
+- **version** (`string`): The version of the package that is being requested, important for resolving the correct instance of the shared module.
+- **GlobalFederation** (`Federation`): An instance representing the global federation context, offering access to global federation-related operations and data.
+- **resolver** (`() => Shared | undefined`): A function that, when executed, resolves the shared module, allowing for the injection of custom resolution logic.
+
+==== Usage Example
+
+[source, javascript]
+----
+import { init, loadRemote } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
+
+const customSharedPlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'custom-shared-plugin',
+    resolveShare(args) {
+      if (args.pkgName !== 'react') {
+        return args;
+      }
+
+      args.resolver = function () {
+        // Custom logic to resolve the 'react' package
+        args.shareScopeMap[args.scope][args.pkgName][args.version] = window.React;
+        return args.shareScopeMap[args.scope][args.pkgName][args.version];
+      };
+      return args;
+    },
+  };
+};
+
+init({
+  name: '@demo/app-main',
+  shared: {
+    react: {
+      version: '17.0.0',
+      lib: () => React,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^17.0.0',
+      },
+    },
+  },
+  plugins: [customSharedPlugin()],
+});
+
+window.React = () => 'Desired Shared';
+
+loadShare('react').then((reactFactory) => {
+  expect(reactFactory()).toEqual(window.React());
+});
+----
+
+In this example, a custom plugin overrides the resolution logic for the 'react' package, ensuring that a specific version or instance (in this case, one attached to `window.React`) is used whenever the 'react' package is resolved in the shared scope.
+
+=== `beforePreloadRemote` Hook
+
+_AsyncHook_
+
+==== Description
+
+The `beforePreloadRemote` hook is an asynchronous hook that is called before the execution of any preload logic by the preload handler.
+
+==== Type
+
+[source, javascript]
+----
+async function beforePreloadRemote(args: BeforePreloadRemoteOptions): BeforePreloadRemoteOptions;
+
+type BeforePreloadRemoteOptions = {
+  preloadOps: Array<PreloadRemoteArgs>;
+  options: Options;
+  origin: FederationHost;
+};
+----
+
+==== Parameters
+
+- **args** (`BeforePreloadRemoteOptions`): The arguments provided to the hook, containing details about the preload operations and the context in which they are executed.
+
+===== `BeforePreloadRemoteOptions` Structure
+
+- **preloadOps** (`Array<PreloadRemoteArgs>`): An array of preload operation arguments, detailing the remote modules and assets to be preloaded.
+- **options** (`Options`): Configuration options applicable to the preload operations, providing additional context and customization capabilities.
+- **origin** (`FederationHost`): The Federation Host instance initiating the preload operations, offering context and relevance to the preload process.
+
+=== `generatePreloadAssets` Hook
+
+_AsyncHook_
+
+==== Description
+
+The `generatePreloadAssets` hook is an asynchronous hook that is invoked specifically to generate preload assets according to predefined configurations. This hook facilitates the dynamic generation of asset lists for preloading, tailored to the current federation context and configurations.
+
+==== Type
+
+[source, javascript]
+----
+async function generatePreloadAssets(args: GeneratePreloadAssetsOptions): Promise<PreloadAssets>;
+
+type GeneratePreloadAssetsOptions = {
+  origin: FederationHost;
+  preloadOptions: PreloadOptions[number];
+  remote: Remote;
+  remoteInfo: RemoteInfo;
+  remoteSnapshot: ModuleInfo;
+  globalSnapshot: GlobalModuleInfo;
+};
+
+interface PreloadAssets {
+  cssAssets: Array<string>;
+  jsAssetsWithoutEntry: Array<string>;
+  entryAssets: Array<EntryAssets>;
+}
+----
+
+==== Parameters
+
+- **args** (`GeneratePreloadAssetsOptions`): The arguments provided to the hook, containing details about the federation context and the specific preload configurations.
+
+===== `GeneratePreloadAssetsOptions` Structure
+
+- **origin** (`FederationHost`): The Federation Host instance that is initiating the preload asset generation, providing a context for the operation.
+- **preloadOptions** (`PreloadOptions[number]`): The specific preload options that are being applied, detailing the assets and modules targeted for preloading.
+- **remote** (`Remote`): The remote module configuration from which the assets are being preloaded.
+- **remoteInfo** (`RemoteInfo`): Detailed information about the remote module, assisting in determining which assets need to be preloaded.
+- **remoteSnapshot** (`ModuleInfo`): A snapshot of the module's current state, providing context for which assets are available and relevant for preloading.
+- **globalSnapshot** (`GlobalModuleInfo`): A global view of the module federation setup, offering insights into the overall state and helping to identify cross-module dependencies and assets for preloading.
+
+===== `PreloadAssets` Interface
+
+- **cssAssets** (`Array<string>`): A list of CSS assets that should be preloaded.
+- **jsAssetsWithoutEntry** (`Array<string>`): JavaScript assets that should be preloaded, excluding entry files.
+- **entryAssets** (`Array<EntryAssets>`): Entry assets that are crucial for initializing the federated modules and should be preloaded.
+
+== loaderHook
+
+=== `createScript`
+
+_SyncHook_
+
+==== Description
+
+The `createScript` function within the `loaderHook` system is a synchronous hook that provides a mechanism to customize script element creation during module loading operations. This hook allows developers to modify or enhance the script tags dynamically before they are injected into the DOM.
+
+==== Type
+
+[source, javascript]
+----
+function createScript(args: CreateScriptOptions): HTMLScriptElement | void;
+
+type CreateScriptOptions = {
+  url: string;
+};
+----
+
+==== Parameters
+
+- **args** (`CreateScriptOptions`): The arguments provided to the hook, containing details about the script being created.
+
+===== `CreateScriptOptions` Structure
+
+- **url** (`string`): The URL of the script to be loaded, typically pointing to a remote module's entry file.
+
+==== Usage Example
+
+[source, javascript]
+----
+import { init } from '@module-federation/runtime';
+import type { FederationRuntimePlugin } from '@module-federation/runtime';
+
+const changeScriptAttributePlugin: () => FederationRuntimePlugin = function () {
+  return {
+    name: 'change-script-attribute',
+    createScript({ url }) {
+      if (url === testRemoteEntry) {
+        let script = document.createElement('script');
+        script.src = url;
+        script.setAttribute('loader-hooks', 'isTrue');
+        script.setAttribute('crossorigin', 'anonymous');
+        return script;
+      }
+    },
+  };
+};
+
+init({
+  plugins: [changeScriptAttributePlugin()],
+});
+----
+
+In this example, a plugin is defined to intercept the creation of a script element. When the URL matches a specific entry (`testRemoteEntry`), the plugin modifies the script tag by setting custom attributes. This could be used to enhance cross-origin handling, add custom data attributes, or integrate with external tracking or monitoring systems.

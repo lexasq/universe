@@ -35,7 +35,7 @@ module.exports = (env) => ({
 
 === Advantages and Limitations
 
-This approach is simple but requires building a new version for each environment to update the URLs, which may not be ideal for enterprise use cases and multiple deployment models.
+This approach is straightforward but requires building a new version for each environment to update the URLs, which may not be ideal for enterprise use cases and multiple deployment models.
 
 == Webpack External Remotes Plugin
 
@@ -61,13 +61,16 @@ plugins: [
 
 All you need to do is define `window.appAUrl` and window.appBUrl within your application before you load any code from the remote applications.
 
-Now you have the flexibility to define your URLs however you want. For example, you could maintain a map of the host URLs to remote URLs for each environment, use server-side rendering to allow the backend to define the URLs, create a custom configuration management service, and many other methods.
+Now you have the flexibility to define your URLs however you want.
+For example, you could maintain a map of the host URLs to remote URLs for each environment,
+use server-side rendering to allow the backend to define the URLs,
+create a custom configuration management service, and many other methods.
 
 This approach is fully dynamic and would solve the use cases, but there is still a slight limitation with this approach. We do not have complete control over the loading lifecycle.
 
 == Promise-Based Dynamic Remotes
 
-Module Federation allows you to define remote URLs as promises instead of URL strings. You can use any promise as long as it fits the get/init interface defined by Module Federation. This method offers more control over the loading process but may be difficult to debug or maintain due to the stringified code in the configuration file.
+Module Federation allows you to define remote URLs as promises instead of URL strings. You can use any promise as long as it fits the get/init interface defined by Module Federation. This method offers more control over the loading process but may be challenging to debug or maintain due to the stringified code in the configuration file.
 
 === Implementation
 
